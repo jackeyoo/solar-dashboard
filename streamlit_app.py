@@ -89,7 +89,7 @@ def prep_data(df):
 if page == "Overview":
     st.title("📊 Energy Overview")
 
-    df = safe_load("equipment")
+    df = safe_load("floor_summary")
     floor_df_summary = safe_load("floor_summary")  # 👈 เพิ่ม
 
     if df.empty:
