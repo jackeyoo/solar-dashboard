@@ -201,18 +201,70 @@ elif page == "Equipment":
 elif page == "Solar":
     st.title("☀️ Solar")
 
-    df = safe_load("solar_monthly")
+df = safe_load("solar_monthly")
 
-    if df.empty:
-        st.warning("โหลดข้อมูลไม่ได้")
+if df is None or df.empty:
+    st.warning("ไม่มีข้อมูล")
+else:
+    # แปลง type กันพลาด
+    df["year"] = df["year"].astype(str)
+    df["month_num"] = pd.to_numeric(df["month_num"], errors="coerce")
+
+    # ---------------------------
+    # 🎯 เลือกปี
+    # ---------------------------
+    years = sorted(df["year"].dropna().unique(), reverse=True)
+    selected_year = st.selectbox("เลือกปี", years)
+
+    df_year = df[df["year"] == selected_year].copy()
+
+    # ---------------------------
+    # 🟩 การ์ดรายเดือน
+    # ---------------------------
+    st.markdown("### ประหยัดค่าไฟจาก Solar (บาท)")
+
+    months_th = [
+        "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
+        "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
+    ]
+
+    cols = st.columns(12)
+
+    for i, m in enumerate(months_th, start=1):
+        val = df_year.loc[df_year["month_num"] == i, "solar_savings_thb"]
+        val = val.values[0] if len(val) > 0 else None
+
+        with cols[i-1]:
+            if pd.notna(val):
+                st.metric(m, f"฿{int(val):,}")
+            else:
+                st.metric(m, "-")
+
+    # ---------------------------
+    # 📊 กราฟ
+    # ---------------------------
+    st.markdown("### กราฟ Solar")
+
+    chart_df = df_year.sort_values("month_num")
+
+    if "month_num" in chart_df.columns:
+        fig = px.bar(
+            chart_df,
+            x="month_num",
+            y="solar_savings_thb",
+            labels={"month_num": "เดือน", "solar_savings_thb": "บาท"},
+            text="solar_savings_thb"
+        )
+        st.plotly_chart(fig, use_container_width=True)
     else:
-        kw_col, _, _ = prep_data(df)
-        month_col = find_col(df, ["month", "เดือน"])
+        st.warning("ไม่มี column month_num")
 
-        st.dataframe(df, use_container_width=True)
+    # ---------------------------
+    # 📋 ตาราง (เฉพาะปีที่เลือก)
+    # ---------------------------
+    st.markdown("### รายการทั้งหมด")
 
-        if month_col and kw_col:
-            fig = px.line(df, x=month_col, y=kw_col)
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.warning("ไม่มี column month หรือ kW")
+    st.dataframe(
+        df_year.sort_values("month_num"),
+        use_container_width=True
+    )
