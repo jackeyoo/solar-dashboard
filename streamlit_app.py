@@ -90,59 +90,38 @@ if page == "Overview":
     st.title("📊 Energy Overview")
 
     df = safe_load("floor_summary")
-    floor_df_summary = safe_load("floor_summary")  # 👈 เพิ่ม
 
     if df.empty:
         st.warning("โหลดข้อมูลไม่ได้")
     else:
-        kw_col, cost_col, floor_col = prep_data(df)
+        # แปลง column ให้ใช้ง่าย
+        df["value_thb"] = df["value_thb"].astype(str)
 
-        total_kw = df[kw_col].sum()
-        total_cost = df[cost_col].sum()
+        def get_kpi(name):
+            row = df[df["kpi"].str.contains(name, na=False)]
+            if row.empty:
+                return 0
+            
+            value = row["value_thb"].values[0]
+
+            # ลบ comma และ %
+            value = value.replace(",", "").replace("%", "")
+            return float(value)
+
+        total_cost = get_kpi("รวม")
+        solar_saving = get_kpi("Solar")
+        net_cost = get_kpi("สุทธิ")
+        percent = get_kpi("%")
 
         col1, col2, col3, col4 = st.columns(4)
 
         col1.markdown(f'<div class="card"><div class="label">Total Cost</div><div class="metric">{total_cost:,.0f}</div></div>', unsafe_allow_html=True)
-        col2.markdown(f'<div class="card"><div class="label">Solar Saving</div><div class="metric">{total_cost*0.4:,.0f}</div></div>', unsafe_allow_html=True)
-        col3.markdown(f'<div class="card"><div class="label">Net Cost</div><div class="metric">{total_cost*0.6:,.0f}</div></div>', unsafe_allow_html=True)
-        col4.markdown(f'<div class="card"><div class="label">Total kW</div><div class="metric">{total_kw:,.2f}</div></div>', unsafe_allow_html=True)
-
-        st.divider()
-
-        # 👇 ใช้ floor_summary แทนการ groupby
-        if not floor_df_summary.empty:
-            st.subheader("📊 สรุปค่าไฟแต่ละชั้น (จาก Floor Summary)")
-            st.dataframe(floor_df_summary, use_container_width=True)
-
-            # auto detect column
-            floor_col = find_col(floor_df_summary, ["floor"])
-            cost_col = find_col(floor_df_summary, ["cost", "บาท"])
-
-            if floor_col and cost_col:
-                floor_df_summary[cost_col] = pd.to_numeric(floor_df_summary[cost_col], errors="coerce")
-
-                col_left, col_right = st.columns([2,1])
-
-                # progress bar
-                max_val = floor_df_summary[cost_col].max()
-                for _, row in floor_df_summary.iterrows():
-                    col_left.progress(
-                        row[cost_col]/max_val,
-                        text=f"{row[floor_col]} | ฿{row[cost_col]:,.0f}"
-                    )
-
-                # pie chart
-                fig = px.pie(
-                    floor_df_summary,
-                    names=floor_col,
-                    values=cost_col,
-                    hole=0.6
-                )
-                col_right.plotly_chart(fig, use_container_width=True)
+        col2.markdown(f'<div class="card"><div class="label">Solar Saving</div><div class="metric">{solar_saving:,.0f}</div></div>', unsafe_allow_html=True)
+        col3.markdown(f'<div class="card"><div class="label">Net Cost</div><div class="metric">{net_cost:,.0f}</div></div>', unsafe_allow_html=True)
+        col4.markdown(f'<div class="card"><div class="label">Saving %</div><div class="metric">{percent:.2f}%</div></div>', unsafe_allow_html=True)
 
         st.divider()
         st.dataframe(df, use_container_width=True)
-
 # ================= EQUIPMENT =================
 elif page == "Equipment":
     st.title("⚙️ Equipment")
