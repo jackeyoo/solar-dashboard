@@ -199,72 +199,28 @@ elif page == "Equipment":
 
 # ================= SOLAR =================
 elif page == "Solar":
-    st.title("☀️ Solar")
+    st.title("☀️ Solar Analysis")
 
-df = safe_load("solar_monthly")
+    df_solar = data["solar"]   # ← ใช้ gid solar
 
-if df is None or df.empty:
-    st.warning("ไม่มีข้อมูล")
-else:
-    # แปลง type กันพลาด
-    df["year"] = df["year"].astype(str)
-    df["month_num"] = pd.to_numeric(df["month_num"], errors="coerce")
+    # clean data
+    df_solar = df_solar[df_solar["solar_saving_thb"].notna()]
+    df_solar["solar_saving_thb"] = pd.to_numeric(df_solar["solar_saving_thb"], errors="coerce")
 
-    # ---------------------------
-    # 🎯 เลือกปี
-    # ---------------------------
-    years = sorted(df["year"].dropna().unique(), reverse=True)
-    selected_year = st.selectbox("เลือกปี", years)
+    # เรียงเดือน
+    df_solar = df_solar.sort_values("month_num")
 
-    df_year = df[df["year"] == selected_year].copy()
-
-    # ---------------------------
-    # 🟩 การ์ดรายเดือน
-    # ---------------------------
-    st.markdown("### ประหยัดค่าไฟจาก Solar (บาท)")
-
-    months_th = [
-        "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
-        "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
-    ]
-
-    cols = st.columns(12)
-
-    for i, m in enumerate(months_th, start=1):
-        val = df_year.loc[df_year["month_num"] == i, "solar_savings_thb"]
-        val = val.values[0] if len(val) > 0 else None
-
-        with cols[i-1]:
-            if pd.notna(val):
-                st.metric(m, f"฿{int(val):,}")
-            else:
-                st.metric(m, "-")
-
-    # ---------------------------
     # 📊 กราฟ
-    # ---------------------------
-    st.markdown("### กราฟ Solar")
-
-    chart_df = df_year.sort_values("month_num")
-
-    if "month_num" in chart_df.columns:
-        fig = px.bar(
-            chart_df,
-            x="month_num",
-            y="solar_savings_thb",
-            labels={"month_num": "เดือน", "solar_savings_thb": "บาท"},
-            text="solar_savings_thb"
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("ไม่มี column month_num")
-
-    # ---------------------------
-    # 📋 ตาราง (เฉพาะปีที่เลือก)
-    # ---------------------------
-    st.markdown("### รายการทั้งหมด")
-
-    st.dataframe(
-        df_year.sort_values("month_num"),
-        use_container_width=True
+    fig = px.line(
+        df_solar,
+        x="month_th",
+        y="solar_saving_thb",
+        markers=True,
+        title="Solar Saving ต่อเดือน"
     )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 💰 รวมเงิน
+    total = df_solar["solar_saving_thb"].sum()
+    st.metric("รวมประหยัด", f"฿{total:,.0f}")
