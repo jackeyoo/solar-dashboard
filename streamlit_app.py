@@ -52,6 +52,7 @@ GIDS = {
     "equipment": 1016544500,
     "solar_monthly": 2105633948,
      "floor_summary": 2040283256,  # 👈 เพิ่มอันนี้
+     "ac_rooms":0,
 }
 
 @st.cache_data(ttl=60)
@@ -90,11 +91,12 @@ if page == "Overview":
     st.title("📊 Energy Overview")
 
     df = safe_load("floor_summary")
+    ac_rooms = safe_load("ac_rooms")
 
+    # ================= KPI =================
     if df.empty:
         st.warning("โหลดข้อมูลไม่ได้")
     else:
-        # แปลง column ให้ใช้ง่าย
         df["value_thb"] = df["value_thb"].astype(str)
 
         def get_kpi(name):
@@ -103,8 +105,6 @@ if page == "Overview":
                 return 0
             
             value = row["value_thb"].values[0]
-
-            # ลบ comma และ %
             value = value.replace(",", "").replace("%", "")
             return float(value)
 
@@ -113,16 +113,73 @@ if page == "Overview":
         net_cost = get_kpi("สุทธิ")
         percent = get_kpi("%")
 
-        col1, col2, col3, col4 = st.columns(4)
+        c1, c2, c3, c4 = st.columns(4)
 
-        col1.markdown(f'<div class="card"><div class="label">Total Cost</div><div class="metric">{total_cost:,.0f}</div></div>', unsafe_allow_html=True)
-        col2.markdown(f'<div class="card"><div class="label">Solar Saving</div><div class="metric">{solar_saving:,.0f}</div></div>', unsafe_allow_html=True)
-        col3.markdown(f'<div class="card"><div class="label">Net Cost</div><div class="metric">{net_cost:,.0f}</div></div>', unsafe_allow_html=True)
-        col4.markdown(f'<div class="card"><div class="label">Saving %</div><div class="metric">{percent:.2f}%</div></div>', unsafe_allow_html=True)
+        c1.metric("💰 Total Cost", f"{total_cost:,.0f}")
+        c2.metric("☀️ Solar Saving", f"{solar_saving:,.0f}")
+        c3.metric("⚡ Net Cost", f"{net_cost:,.0f}")
+        c4.metric("📉 Saving %", f"{percent:.2f}%")
+
+    st.divider()
+
+    # ================= AC ROOMS =================
+    if not ac_rooms.empty:
+        st.subheader("❄️ AC Rooms Analysis")
+
+        room_col = find_col(ac_rooms, ["room", "ห้อง"])
+        cost_col = find_col(ac_rooms, ["cost", "hour", "บาท"])
+
+        if cost_col:
+            ac_rooms[cost_col] = pd.to_numeric(ac_rooms[cost_col], errors="coerce")
+
+        if room_col and cost_col:
+            chart = ac_rooms.groupby(room_col)[cost_col].sum().reset_index()
+
+            # 🔥 เรียงจากมากไปน้อย
+            chart = chart.sort_values(cost_col, ascending=False)
+
+            col1, col2 = st.columns(2)
+
+            # ---------- BAR ----------
+            fig = px.bar(
+                chart,
+                x=room_col,
+                y=cost_col,
+                text=cost_col,
+                title="ค่าไฟแต่ละห้อง (เรียงจากมาก → น้อย)"
+            )
+            fig.update_traces(textposition="outside")
+            col1.plotly_chart(fig, use_container_width=True)
+
+            # ---------- PIE ----------
+            fig2 = px.pie(
+                chart,
+                names=room_col,
+                values=cost_col,
+                hole=0.6
+            )
+            col2.plotly_chart(fig2, use_container_width=True)
+
+            # 🔥 ห้องกินไฟสูงสุด
+            top = chart.iloc[0]
+            st.error(f"🔥 ห้องกินไฟสูงสุด: {top[room_col]} ({top[cost_col]:,.0f} บาท)")
+
+            # 🏆 Top 5
+            st.subheader("🏆 Top 5 ห้องกินไฟสูงสุด")
+            st.dataframe(chart.head(5), use_container_width=True)
 
         st.divider()
-        st.dataframe(df, use_container_width=True)
+
+        # 📋 ตารางทั้งหมด
+        st.subheader("📋 รายการห้องแอร์ทั้งหมด")
+        st.dataframe(ac_rooms, use_container_width=True)
+
+    else:
+        st.warning("ไม่มีข้อมูล AC Rooms")
+  
 # ================= EQUIPMENT =================
+
+
 elif page == "Equipment":
     st.title("⚙️ Equipment")
 
