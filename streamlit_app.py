@@ -51,6 +51,7 @@ SHEET_ID = "1VrPweycTM3I-bDp7Ipa7zXm40bEjIq_8dvgMtAV5e7w"
 GIDS = {
     "equipment": 1016544500,
     "solar_monthly": 2105633948,
+     "floor_summary": 2040283256,  # 👈 เพิ่มอันนี้
 }
 
 @st.cache_data(ttl=60)
@@ -89,6 +90,7 @@ if page == "Overview":
     st.title("📊 Energy Overview")
 
     df = safe_load("equipment")
+    floor_df_summary = safe_load("floor_summary")  # 👈 เพิ่ม
 
     if df.empty:
         st.warning("โหลดข้อมูลไม่ได้")
@@ -107,20 +109,38 @@ if page == "Overview":
 
         st.divider()
 
-        col_left, col_right = st.columns([2,1])
+        # 👇 ใช้ floor_summary แทนการ groupby
+        if not floor_df_summary.empty:
+            st.subheader("📊 สรุปค่าไฟแต่ละชั้น (จาก Floor Summary)")
+            st.dataframe(floor_df_summary, use_container_width=True)
 
-        if floor_col:
-            floor_df = df.groupby(floor_col)[cost_col].sum()
-            col_left.subheader("ค่าไฟแต่ละชั้น")
+            # auto detect column
+            floor_col = find_col(floor_df_summary, ["floor"])
+            cost_col = find_col(floor_df_summary, ["cost", "บาท"])
 
-            max_val = floor_df.max()
-            for f, v in floor_df.items():
-                col_left.progress(v/max_val, text=f"{f} | ฿{v:,.0f}")
+            if floor_col and cost_col:
+                floor_df_summary[cost_col] = pd.to_numeric(floor_df_summary[cost_col], errors="coerce")
 
-            pie = floor_df.reset_index(name=cost_col)
-            fig = px.pie(pie, names=floor_col, values=cost_col, hole=0.6)
-            col_right.plotly_chart(fig, use_container_width=True)
+                col_left, col_right = st.columns([2,1])
 
+                # progress bar
+                max_val = floor_df_summary[cost_col].max()
+                for _, row in floor_df_summary.iterrows():
+                    col_left.progress(
+                        row[cost_col]/max_val,
+                        text=f"{row[floor_col]} | ฿{row[cost_col]:,.0f}"
+                    )
+
+                # pie chart
+                fig = px.pie(
+                    floor_df_summary,
+                    names=floor_col,
+                    values=cost_col,
+                    hole=0.6
+                )
+                col_right.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
         st.dataframe(df, use_container_width=True)
 
 # ================= EQUIPMENT =================
