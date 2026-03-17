@@ -196,31 +196,47 @@ elif page == "Equipment":
             chart = df.groupby(floor_col)[kw_col].sum().reset_index()
             fig = px.bar(chart, x=floor_col, y=kw_col)
             st.plotly_chart(fig, use_container_width=True)
-
 # ================= SOLAR =================
 elif page == "Solar":
     st.title("☀️ Solar Analysis")
 
-    df_solar = data["solar"]   # ← ใช้ gid solar
+    df_solar = safe_load("solar_monthly")
 
-    # clean data
-    df_solar = df_solar[df_solar["solar_saving_thb"].notna()]
-    df_solar["solar_saving_thb"] = pd.to_numeric(df_solar["solar_saving_thb"], errors="coerce")
+    if df_solar.empty:
+        st.warning("โหลดข้อมูล Solar ไม่ได้")
+    else:
+        # แปลงข้อมูลตัวเลข
+        if "solar_saving_thb" in df_solar.columns:
+            df_solar["solar_saving_thb"] = pd.to_numeric(
+                df_solar["solar_saving_thb"], errors="coerce"
+            )
 
-    # เรียงเดือน
-    df_solar = df_solar.sort_values("month_num")
+        if "month_num" in df_solar.columns:
+            df_solar["month_num"] = pd.to_numeric(
+                df_solar["month_num"], errors="coerce"
+            )
 
-    # 📊 กราฟ
-    fig = px.line(
-        df_solar,
-        x="month_th",
-        y="solar_saving_thb",
-        markers=True,
-        title="Solar Saving ต่อเดือน"
-    )
+        # ลบแถวที่ไม่มีค่า
+        df_solar = df_solar[df_solar["solar_saving_thb"].notna()]
 
-    st.plotly_chart(fig, use_container_width=True)
+        # เรียงเดือน
+        if "month_num" in df_solar.columns:
+            df_solar = df_solar.sort_values("month_num")
 
-    # 💰 รวมเงิน
-    total = df_solar["solar_saving_thb"].sum()
-    st.metric("รวมประหยัด", f"฿{total:,.0f}")
+        # กราฟ
+        fig = px.line(
+            df_solar,
+            x="month_th",
+            y="solar_saving_thb",
+            markers=True,
+            title="Solar Saving ต่อเดือน"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # KPI รวม
+        total = df_solar["solar_saving_thb"].sum()
+        st.metric("รวมประหยัด", f"฿{total:,.0f}")
+
+        # ตารางข้อมูล
+        st.dataframe(df_solar, use_container_width=True)
