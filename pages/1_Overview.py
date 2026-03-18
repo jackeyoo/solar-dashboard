@@ -1,11 +1,11 @@
-
+st.sidebar.markdown("## ⚡ Nature Biotech")
 import streamlit as st
 st.set_page_config(page_title="Overview", page_icon="📊", layout="wide")
 
 import plotly.express as px
 from utils import safe_load, find_col, to_num
 from style import apply_style, plot_theme
-st.sidebar.markdown("## ⚡ Nature Biotech")
+
 
 apply_style()
 if st.sidebar.button("🔄 Refresh Data"):
