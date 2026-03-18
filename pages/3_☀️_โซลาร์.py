@@ -154,6 +154,6 @@ st.subheader("📋 ข้อมูลรายเดือน")
 st.dataframe(df, use_container_width=True, hide_index=True)
 
 # ---------------- debug ไปล่างสุด ----------------
-with st.expander("🔍 Debug: ดูคอลัมน์จริง"):
-    st.write(list(df.columns))
-    st.dataframe(df.head(10), use_container_width=True)
+# with st.expander("🔍 Debug: ดูคอลัมน์จริง"):
+#     st.write(list(df.columns))
+#     st.dataframe(df.head(10), use_container_width=True)
