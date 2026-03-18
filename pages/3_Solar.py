@@ -11,9 +11,6 @@ render_sidebar()
 st.set_page_config(page_title="Solar", page_icon="☀️", layout="wide")
 apply_style()
 
-# if st.button("🔄 Refresh Data"):
-#     st.cache_data.clear()
-#     st.rerun()
 
 st.title("☀️ Solar Analysis")
 
