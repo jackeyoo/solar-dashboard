@@ -1,7 +1,7 @@
 
 import streamlit as st
 st.sidebar.markdown("## ⚡ Nature Biotech")
-st.set_page_config(page_title="Overview", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Dashboard Solarcell", page_icon="📊", layout="wide")
 
 import plotly.express as px
 from utils import safe_load, find_col, to_num
