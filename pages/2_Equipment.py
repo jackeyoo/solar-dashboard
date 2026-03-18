@@ -4,11 +4,19 @@ from utils import safe_load, find_col, to_num
 from style import apply_style, plot_theme
 
 
-st.set_page_config(page_title="Equipment", page_icon="⚙️", layout="wide")
+
+from components.sidebar import render_sidebar
+from style import apply_style
 apply_style()
-if st.button("🔄 Refresh Data"):
-    st.cache_data.clear()
-    st.rerun()
+render_sidebar()
+
+
+
+# st.set_page_config(page_title="Equipment", page_icon="⚙️", layout="wide")
+# apply_style()
+# if st.button("🔄 Refresh Data"):
+#     st.cache_data.clear()
+#     st.rerun()
 
 st.title("⚙️ Equipment Analysis")
 
