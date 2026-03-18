@@ -7,7 +7,7 @@ def apply_style():
     /* ===== ซ่อน menu default ===== */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+    # header {visibility: hidden;}
 
     /* 🔥 ซ่อน streamlit_app (FIX จริง) */
     [data-testid="stSidebarNav"] ul li:first-child {
