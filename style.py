@@ -5,40 +5,33 @@ def apply_style():
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-    /* ===== ซ่อน menu default ===== */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* ===== ซ่อน streamlit_app ใน sidebar nav ===== */
     [data-testid="stSidebarNav"] ul li:first-child {
         display: none !important;
     }
 
-    /* ===== Background ===== */
     .stApp {
         background: #DCDCDC;
     }
 
-    /* ===== Layout ===== */
     .block-container {
         padding-top: 1.5rem;
         padding-bottom: 2rem;
         max-width: 1400px;
     }
 
-    /* ===== Sidebar ===== */
     [data-testid="stSidebar"] {
         background: #000000;
         border-right: 1px solid rgba(148,163,184,0.2);
     }
 
-    /* ===== Sidebar text ทั้งหมด ===== */
-   [data-testid="stSidebar"] * {
-    color: white !important;
-}
+    [data-testid="stSidebar"] * {
+        color: white !important;
+    }
 
-    /* ===== Sidebar Title ===== */
     [data-testid="stSidebar"] h1,
     [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3,
@@ -46,11 +39,13 @@ def apply_style():
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] div {
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] a,
+    [data-testid="stSidebar"] li {
         color: white !important;
+        font-family: 'Prompt', sans-serif !important;
     }
 
-    /* ===== Sidebar Button ===== */
     [data-testid="stSidebar"] .stButton button {
         background-color: #111827 !important;
         color: white !important;
@@ -63,7 +58,6 @@ def apply_style():
         color: white !important;
     }
 
-    /* ===== Selectbox / Input ===== */
     [data-testid="stSidebar"] .stSelectbox div,
     [data-testid="stSidebar"] .stTextInput input,
     [data-testid="stSidebar"] .stTextArea textarea,
@@ -72,7 +66,11 @@ def apply_style():
         background-color: #111827 !important;
     }
 
-    /* ===== Card ===== */
+    [data-testid="stDataFrame"] {
+        border: 1px solid rgba(148,163,184,0.2);
+        border-radius: 12px;
+    }
+
     .card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -82,7 +80,6 @@ def apply_style():
         margin-bottom: 8px;
     }
 
-    /* ===== Text ===== */
     .label {
         color: #64748b;
         font-size: 0.85rem;
@@ -96,14 +93,16 @@ def apply_style():
         line-height: 1.2;
     }
 
-    /* ===== Dataframe ===== */
-    [data-testid="stDataFrame"] {
-        border: 1px solid rgba(148,163,184,0.2);
-        border-radius: 12px;
+    /* แก้ปุ่มเปิด/ปิด sidebar ที่ขึ้น keyboard_double... */
+    button[kind="header"] span,
+    button[kind="header"] i,
+    [data-testid="collapsedControl"] span,
+    [data-testid="collapsedControl"] i {
+        font-family: "Material Symbols Rounded", "Material Symbols Outlined", sans-serif !important;
+        font-size: 24px !important;
     }
     </style>
     """, unsafe_allow_html=True)
-
 
 def plot_theme(fig):
     fig.update_layout(
