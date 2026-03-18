@@ -16,7 +16,7 @@ st.title("📊 Energy Overview")
 df        = safe_load("floor_summary")
 ac_rooms  = safe_load("ac_rooms")
 
-# ─── KPI ──────────────────────────────────────────────────────────────────────
+# ─── KPI ─────────────────────────────────────────────────────
 if df.empty:
     st.warning("โหลดข้อมูล floor_summary ไม่ได้")
 else:
@@ -45,42 +45,65 @@ else:
 
 st.divider()
 
-# ─── AC ROOMS ─────────────────────────────────────────────────────────────────
+# ─── AC ROOMS ─────────────────────────────────────────────────
 if ac_rooms.empty:
     st.warning("ไม่มีข้อมูล AC Rooms")
 else:
     st.subheader("❄️ AC Rooms Analysis")
 
-    room_col = find_col(ac_rooms, ["room", ""])
-    cost_col = find_col(ac_rooms, ["cost", "hour", ""])
+    # ✅ FIX: เอา "" ออก
+    room_col = find_col(ac_rooms, ["room", "ห้อง"])
+    cost_col = find_col(ac_rooms, ["cost", "hour", "บาท"])
 
-    if cost_col:
-        ac_rooms[cost_col] = to_num(ac_rooms[cost_col])
+    # debug กันพัง
+    if not room_col or not cost_col:
+        st.error("หา column ไม่เจอ")
+        st.write("Columns:", ac_rooms.columns)
+        st.stop()
 
-    if room_col and cost_col:
-        chart = (
-            ac_rooms.groupby(room_col)[cost_col]
-            .sum()
-            .reset_index()
-            .sort_values(cost_col, ascending=False)
-        )
+    # แปลงตัวเลข
+    ac_rooms[cost_col] = to_num(ac_rooms[cost_col])
 
-        col1, col2 = st.columns(2)
+    # ✅ FIX: กัน reset_index crash
+    chart = (
+        ac_rooms
+        .dropna(subset=[room_col, cost_col])
+        .groupby(room_col, as_index=False)[cost_col]
+        .sum()
+        .sort_values(cost_col, ascending=False)
+    )
 
-        fig = px.bar(chart, x=room_col, y=cost_col, text=cost_col,
-                     title="ค่าไฟแต่ละห้อง (มาก → น้อย)")
-        fig.update_traces(textposition="outside")
-        col1.plotly_chart(plot_theme(fig), use_container_width=True)
+    col1, col2 = st.columns(2)
 
-        fig2 = px.pie(chart, names=room_col, values=cost_col, hole=0.6)
-        col2.plotly_chart(plot_theme(fig2), use_container_width=True)
+    # BAR
+    fig = px.bar(
+        chart,
+        x=room_col,
+        y=cost_col,
+        text=cost_col,
+        title="ค่าไฟแต่ละห้อง (มาก → น้อย)"
+    )
+    fig.update_traces(textposition="outside")
+    col1.plotly_chart(plot_theme(fig), use_container_width=True)
 
+    # PIE
+    fig2 = px.pie(
+        chart,
+        names=room_col,
+        values=cost_col,
+        hole=0.6
+    )
+    col2.plotly_chart(plot_theme(fig2), use_container_width=True)
+
+    # TOP ROOM
+    if not chart.empty:
         top = chart.iloc[0]
-        st.error(f"🔥 ห้องกินไฟสูงสุด: {top[room_col]}  ({top[cost_col]:,.0f} บาท)")
+        st.error(f"🔥 ห้องกินไฟสูงสุด: {top[room_col]} ({top[cost_col]:,.0f} บาท)")
 
         st.subheader("🏆 Top 5 ห้องกินไฟสูงสุด")
         st.dataframe(chart.head(5), use_container_width=True, hide_index=True)
 
     st.divider()
+
     st.subheader("📋 รายการห้องแอร์ทั้งหมด")
     st.dataframe(ac_rooms, use_container_width=True, hide_index=True)
