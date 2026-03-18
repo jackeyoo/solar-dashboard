@@ -3,8 +3,9 @@ import pandas as pd
 import plotly.express as px
 from utils import safe_load, find_col
 from style import apply_style
-apply_style()
 
+apply_style()
+st.write("Equipment page loaded")
 st.title("⚙️ Equipment")
 
 df = safe_load("equipment")
@@ -18,7 +19,8 @@ else:
     st.dataframe(df, use_container_width=True)
 
     if floor_col and kw_col:
-        df[kw_col] = df[kw_col].astype(float)
+        # ✅ FIX จุดพัง
+        df[kw_col] = pd.to_numeric(df[kw_col], errors="coerce")
 
         chart = df.groupby(floor_col)[kw_col].sum().reset_index()
 
