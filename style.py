@@ -17,7 +17,7 @@ def apply_style():
     /* ===== Background ===== */
     .stApp {
         # background: #f8fafc;
-       background:   #E0FFFF ;
+       background:   #F5F5DC ;
     }
 
     /* ===== Layout ===== */
