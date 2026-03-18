@@ -1,34 +1,58 @@
 import streamlit as st
-import pandas as pd
 import plotly.express as px
-from utils import safe_load, find_col
-from style import apply_style
+from utils import safe_load, find_col, to_num
+from style import apply_style, plot_theme
 
+st.set_page_config(page_title="Equipment", page_icon="⚙️", layout="wide")
 apply_style()
-st.write("Equipment page loaded")
-st.title("⚙️ Equipment")
+
+st.sidebar.markdown("## ⚡ Nature Biotech")
+if st.sidebar.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+    st.rerun()
+
+st.title("⚙️ Equipment Analysis")
 
 df = safe_load("equipment")
 
 if df.empty:
-    st.warning("โหลดข้อมูลไม่ได้")
+    st.warning("โหลดข้อมูล Equipment ไม่ได้ — ลองกด Refresh หรือเช็ค GID")
+    st.stop()
+
+# ─── แปลงตัวเลข ───────────────────────────────────────────────────────────────
+kw_col   = find_col(df, ["kw", "watt", "power"])
+cost_col = find_col(df, ["per_hour", "cost", "hour", "price"])
+floor_col= find_col(df, ["floor", ""])
+name_col = find_col(df, ["equipment", "type", "machine", "name"])
+
+if kw_col:
+    df[kw_col]   = to_num(df[kw_col])
+if cost_col:
+    df[cost_col] = to_num(df[cost_col])
+
+# ─── ตาราง ────────────────────────────────────────────────────────────────────
+st.dataframe(df, use_container_width=True, hide_index=True)
+
+st.divider()
+
+# ─── กราฟ kW แต่ละชั้น ────────────────────────────────────────────────────────
+if floor_col and kw_col:
+    chart = df.groupby(floor_col, dropna=False)[kw_col].sum().reset_index()
+    fig = px.bar(chart, x=floor_col, y=kw_col, text_auto=True,
+                 color=kw_col, color_continuous_scale="Teal",
+                 title="Power (kW) by Floor")
+    st.plotly_chart(plot_theme(fig), use_container_width=True)
 else:
-    kw_col = find_col(df, ["kw"])
-    floor_col = find_col(df, ["floor"])
+    st.info(f"หาคอลัมน์ floor/kw ไม่เจอ — คอลัมน์ที่มี: `{'`, `'.join(df.columns)}`")
 
-    st.dataframe(df, use_container_width=True)
-
-    if floor_col and kw_col:
-        # ✅ FIX จุดพัง
-        df[kw_col] = pd.to_numeric(df[kw_col], errors="coerce")
-
-        chart = df.groupby(floor_col)[kw_col].sum().reset_index()
-
-        fig = px.bar(
-            chart,
-            x=floor_col,
-            y=kw_col,
-            title="Energy per Floor"
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
+# ─── กราฟ cost รายอุปกรณ์ ─────────────────────────────────────────────────────
+if name_col and cost_col:
+    top = (
+        df[[name_col, cost_col]].dropna()
+        .sort_values(cost_col, ascending=False)
+        .head(10)
+    )
+    fig2 = px.bar(top, x=name_col, y=cost_col, text_auto=True,
+                  color=cost_col, color_continuous_scale="Sunset",
+                  title="Top 10 Equipment by Cost/Hour")
+    st.plotly_chart(plot_theme(fig2), use_container_width=True)
