@@ -5,12 +5,14 @@ from style import apply_style, plot_theme
 from components.sidebar import render_sidebar
 
 
+# 🔥 ต้องอยู่บนสุด
+st.set_page_config(page_title="Overview", page_icon="📊", layout="wide")
+
+from style import apply_style
+from components.sidebar import render_sidebar
+
 apply_style()
 render_sidebar()
-
-st.set_page_config(page_title="Solar", page_icon="☀️", layout="wide")
-apply_style()
-
 
 
 
