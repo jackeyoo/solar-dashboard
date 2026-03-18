@@ -17,7 +17,8 @@ def apply_style():
     /* ===== Background ===== */
     .stApp {
         # background: #f8fafc;
-       background:   #DCDCDC;
+    #    background:   #DCDCDC;
+         background: #9F0F8FF;
     }
 
     /* ===== Layout ===== */
@@ -29,7 +30,8 @@ def apply_style():
 
     /* ===== Sidebar ===== */
     [data-testid="stSidebar"] {
-        background: #9F0F8FF;
+        background:   #DCDCDC;
+        #   background: #9F0F8FF;
         border-right: 1px solid rgba(148,163,184,0.2);
     }
 
