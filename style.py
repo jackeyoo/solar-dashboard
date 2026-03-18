@@ -2,23 +2,22 @@ import streamlit as st
 
 def apply_style():
     st.markdown("""
-    <style>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <style>
     /* ===== ซ่อน menu default ===== */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    # header {visibility: hidden;}
+    header {visibility: hidden;}
 
-    /* 🔥 ซ่อน streamlit_app (FIX จริง) */
+    /* ===== ซ่อน streamlit_app ใน sidebar nav ===== */
     [data-testid="stSidebarNav"] ul li:first-child {
         display: none !important;
     }
 
     /* ===== Background ===== */
     .stApp {
-        # background: #f8fafc;
-    #    background:   #DCDCDC;
-         background: #9F0F8FF;
+        background: #DCDCDC;
     }
 
     /* ===== Layout ===== */
@@ -30,11 +29,49 @@ def apply_style():
 
     /* ===== Sidebar ===== */
     [data-testid="stSidebar"] {
-     color: white !important;
-          background:   #000000;
-        # background:   #DCDCDC;
-        #   background: #9F0F8FF;
+        background: #000000;
         border-right: 1px solid rgba(148,163,184,0.2);
+    }
+
+    /* ===== Sidebar text ทั้งหมด ===== */
+    [data-testid="stSidebar"] * {
+        color: white !important;
+        font-size: 15px !important;
+        font-family: 'Prompt', sans-serif !important;
+    }
+
+    /* ===== Sidebar Title ===== */
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] .stMarkdown,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div {
+        color: white !important;
+    }
+
+    /* ===== Sidebar Button ===== */
+    [data-testid="stSidebar"] .stButton button {
+        background-color: #111827 !important;
+        color: white !important;
+        border-radius: 10px !important;
+        border: none !important;
+    }
+
+    [data-testid="stSidebar"] .stButton button:hover {
+        background-color: #22c55e !important;
+        color: white !important;
+    }
+
+    /* ===== Selectbox / Input ===== */
+    [data-testid="stSidebar"] .stSelectbox div,
+    [data-testid="stSidebar"] .stTextInput input,
+    [data-testid="stSidebar"] .stTextArea textarea,
+    [data-testid="stSidebar"] .stNumberInput input {
+        color: white !important;
+        background-color: #111827 !important;
     }
 
     /* ===== Card ===== */
@@ -66,57 +103,6 @@ def apply_style():
         border: 1px solid rgba(148,163,184,0.2);
         border-radius: 12px;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /* ===== Sidebar Title ===== */
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 {
-    color: #22c55e !important;
-    font-weight: 700;
-}
-
-/* ===== Sidebar Button ===== */
-[data-testid="stSidebar"] .stButton button {
-    background-color: #111827;
-    color: white !important;
-    border-radius: 10px;
-    border: none;
-}
-
-[data-testid="stSidebar"] .stButton button:hover {
-    background-color: #22c55e;
-}
-
-/* ===== Sidebar Selectbox / Input ===== */
-[data-testid="stSidebar"] .stSelectbox div,
-[data-testid="stSidebar"] .stTextInput input {
-    color: white !important;
-}
-    
-    
-    
-    
-    
-    
-    
-    
-    
- /* ===== Sidebar TEXT FIX ===== */
-[data-testid="stSidebar"] * {
-    color: white !important;
-    font-size: 15px;
-    font-family: 'Prompt', sans-serif;
-}
     </style>
     """, unsafe_allow_html=True)
 
