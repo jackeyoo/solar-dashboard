@@ -100,17 +100,13 @@ def apply_style():
     }
 
     /* ปุ่มเปิด/ปิด sidebar */
-   button[kind="header"] span,
-button[kind="header"] i,
-[data-testid="collapsedControl"] span,
-[data-testid="collapsedControl"] i {
-    color: white !important;
-    font-family: "Material Symbols Rounded", "Material Symbols Outlined", sans-serif !important;
-    font-size: 24px !important;
-    line-height: 1 !important;
-    letter-spacing: normal !important;
-    text-transform: none !important;
-}
+    button[kind="header"] {
+        
+        background: transparent !important;
+        border: none !important;
+        color: white !important;
+        box-shadow: none !important;
+    }
 
     button[kind="header"]:hover {
         background: rgba(255,255,255,0.08) !important;
