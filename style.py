@@ -8,9 +8,9 @@ def apply_style():
     footer     {visibility: hidden;}
     header     {visibility: hidden;}
 
-    .stApp {
-  background: radial-gradient(circle at top right, #dbeafe 0%, #1e3a8a 50%, #020617 100%);
-    }
+   .stApp {
+    background: #0f172a;
+}
     .block-container {
         padding-top: 1.5rem;
         padding-bottom: 2rem;
