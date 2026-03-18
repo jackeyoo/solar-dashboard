@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from style import apply_style
+apply_style()
 
 st.set_page_config(page_title="Energy Dashboard", layout="wide")
 
@@ -180,64 +182,64 @@ if page == "Overview":
 # ================= EQUIPMENT =================
 
 
-elif page == "Equipment":
-    st.title("⚙️ Equipment")
+# elif page == "Equipment":
+#     st.title("⚙️ Equipment")
 
-    df = safe_load("equipment")
+#     df = safe_load("equipment")
 
-    if df.empty:
-        st.warning("โหลดข้อมูลไม่ได้")
-    else:
-        kw_col, _, floor_col = prep_data(df)
+#     if df.empty:
+#         st.warning("โหลดข้อมูลไม่ได้")
+#     else:
+#         kw_col, _, floor_col = prep_data(df)
 
-        st.dataframe(df, use_container_width=True)
+#         st.dataframe(df, use_container_width=True)
 
-        if floor_col and kw_col:
-            chart = df.groupby(floor_col)[kw_col].sum().reset_index()
-            fig = px.bar(chart, x=floor_col, y=kw_col)
-            st.plotly_chart(fig, use_container_width=True)
-# ================= SOLAR =================
-elif page == "Solar":
-    st.title("☀️ Solar Analysis")
+#         if floor_col and kw_col:
+#             chart = df.groupby(floor_col)[kw_col].sum().reset_index()
+#             fig = px.bar(chart, x=floor_col, y=kw_col)
+#             st.plotly_chart(fig, use_container_width=True)
+# # ================= SOLAR =================
+# elif page == "Solar":
+#     st.title("☀️ Solar Analysis")
 
-    df_solar = safe_load("solar_monthly")
+#     df_solar = safe_load("solar_monthly")
 
-    if df_solar.empty:
-        st.warning("โหลดข้อมูล Solar ไม่ได้")
-    else:
-        # แปลงข้อมูลตัวเลข
-        if "solar_saving_thb" in df_solar.columns:
-            df_solar["solar_saving_thb"] = pd.to_numeric(
-                df_solar["solar_saving_thb"], errors="coerce"
-            )
+#     if df_solar.empty:
+#         st.warning("โหลดข้อมูล Solar ไม่ได้")
+#     else:
+#         # แปลงข้อมูลตัวเลข
+#         if "solar_saving_thb" in df_solar.columns:
+#             df_solar["solar_saving_thb"] = pd.to_numeric(
+#                 df_solar["solar_saving_thb"], errors="coerce"
+#             )
 
-        if "month_num" in df_solar.columns:
-            df_solar["month_num"] = pd.to_numeric(
-                df_solar["month_num"], errors="coerce"
-            )
+#         if "month_num" in df_solar.columns:
+#             df_solar["month_num"] = pd.to_numeric(
+#                 df_solar["month_num"], errors="coerce"
+#             )
 
-        # ลบแถวที่ไม่มีค่า
-        df_solar = df_solar[df_solar["solar_saving_thb"].notna()]
+#         # ลบแถวที่ไม่มีค่า
+#         df_solar = df_solar[df_solar["solar_saving_thb"].notna()]
 
-        # เรียงเดือน
-        if "month_num" in df_solar.columns:
-            df_solar = df_solar.sort_values("month_num")
+#         # เรียงเดือน
+#         if "month_num" in df_solar.columns:
+#             df_solar = df_solar.sort_values("month_num")
 
-        # กราฟ
-        fig = px.line(
-            df_solar,
-            x="month_th",
-            y="solar_saving_thb",
-            markers=True,
-            title="Solar Saving ต่อเดือน"
-        )
+#         # กราฟ
+#         fig = px.line(
+#             df_solar,
+#             x="month_th",
+#             y="solar_saving_thb",
+#             markers=True,
+#             title="Solar Saving ต่อเดือน"
+#         )
 
-        st.plotly_chart(fig, use_container_width=True)
+#         st.plotly_chart(fig, use_container_width=True)
 
-        # KPI รวม
-        total = df_solar["solar_saving_thb"].sum()
-        st.metric("รวมประหยัด", f"฿{total:,.0f}")
+#         # KPI รวม
+#         total = df_solar["solar_saving_thb"].sum()
+#         st.metric("รวมประหยัด", f"฿{total:,.0f}")
 
-        # ตารางข้อมูล
-        st.dataframe(df_solar, use_container_width=True)
+#         # ตารางข้อมูล
+#         st.dataframe(df_solar, use_container_width=True)
 
