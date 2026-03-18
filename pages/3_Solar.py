@@ -11,7 +11,11 @@ st.set_page_config(page_title="Overview", page_icon="📊", layout="wide")
 # from style import apply_style
 # from components.sidebar import render_sidebar
 
-# apply_style()
+apply_style()
+if st.sidebar.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+    st.rerun()
+
 # render_sidebar()
 
 

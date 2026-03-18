@@ -7,8 +7,11 @@ from style import apply_style, plot_theme
 
 # from components.sidebar import render_sidebar
 # from style import apply_style
-# apply_style()
+apply_style()
 # render_sidebar()
+if st.sidebar.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+    st.rerun()
 
 
 

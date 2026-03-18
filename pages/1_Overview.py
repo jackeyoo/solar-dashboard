@@ -6,7 +6,7 @@ from style import apply_style, plot_theme
 st.set_page_config(page_title="Overview", page_icon="📊", layout="wide")
 apply_style()
 
-st.sidebar.markdown("## ⚡ Nature Biotech")
+# st.sidebar.markdown("## ⚡ Nature Biotech")
 if st.sidebar.button("🔄 Refresh Data"):
     st.cache_data.clear()
     st.rerun()
