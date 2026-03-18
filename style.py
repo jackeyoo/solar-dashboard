@@ -7,7 +7,6 @@ def apply_style():
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
 
     [data-testid="stSidebarNav"] ul li:first-child {
         display: none !important;
@@ -38,8 +37,6 @@ def apply_style():
     [data-testid="stSidebar"] .stMarkdown,
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] div,
     [data-testid="stSidebar"] a,
     [data-testid="stSidebar"] li {
         color: white !important;
@@ -51,6 +48,7 @@ def apply_style():
         color: white !important;
         border-radius: 10px !important;
         border: none !important;
+        font-family: 'Prompt', sans-serif !important;
     }
 
     [data-testid="stSidebar"] .stButton button:hover {
@@ -64,6 +62,7 @@ def apply_style():
     [data-testid="stSidebar"] .stNumberInput input {
         color: white !important;
         background-color: #111827 !important;
+        font-family: 'Prompt', sans-serif !important;
     }
 
     [data-testid="stDataFrame"] {
@@ -84,6 +83,7 @@ def apply_style():
         color: #64748b;
         font-size: 0.85rem;
         margin-bottom: 0.4rem;
+        font-family: 'Prompt', sans-serif !important;
     }
 
     .metric {
@@ -91,15 +91,36 @@ def apply_style():
         font-size: 1.7rem;
         font-weight: 700;
         line-height: 1.2;
+        font-family: 'Prompt', sans-serif !important;
     }
 
-    /* แก้ปุ่มเปิด/ปิด sidebar ที่ขึ้น keyboard_double... */
+    /* header ให้โปร่งใส แต่ไม่ซ่อน */
+    [data-testid="stHeader"] {
+        background: transparent !important;
+    }
+
+    /* ปุ่มเปิด/ปิด sidebar */
+    button[kind="header"] {
+        background: transparent !important;
+        border: none !important;
+        color: white !important;
+        box-shadow: none !important;
+    }
+
+    button[kind="header"]:hover {
+        background: rgba(255,255,255,0.08) !important;
+    }
+
+    /* อย่าให้ icon font โดน Prompt ทับ */
     button[kind="header"] span,
     button[kind="header"] i,
     [data-testid="collapsedControl"] span,
     [data-testid="collapsedControl"] i {
         font-family: "Material Symbols Rounded", "Material Symbols Outlined", sans-serif !important;
         font-size: 24px !important;
+        line-height: 1 !important;
+        letter-spacing: normal !important;
+        text-transform: none !important;
     }
     </style>
     """, unsafe_allow_html=True)
