@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 import plotly.express as px
 from utils import safe_load, find_col
 from style import apply_style
