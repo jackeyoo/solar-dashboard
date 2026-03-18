@@ -9,7 +9,7 @@ def apply_style():
     header     {visibility: hidden;}
 
    .stApp {
-    background: #0f172a;
+    background: #FFFAFA;
 }
     .block-container {
         padding-top: 1.5rem;
