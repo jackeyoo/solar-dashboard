@@ -24,3 +24,7 @@
 #     <p style="color:#94A3B8;">เลือกเมนูด้านซ้ายเพื่อดูข้อมูล</p>
 # </div>
 # """, unsafe_allow_html=True)
+
+import streamlit as st
+
+st.switch_page("pages/1_Overview.py")
