@@ -17,7 +17,7 @@ def apply_style():
         max-width: 1400px;
     }
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+      background: #DCDCDC ;
         border-right: 1px solid rgba(148,163,184,0.15);
     }
     .card {
