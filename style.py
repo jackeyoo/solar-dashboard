@@ -84,33 +84,7 @@ def apply_style():
     
     
     
-    /* ===== Sidebar Title ===== */
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 {
-    color: #22c55e !important;
-    font-weight: 700;
-}
-
-/* ===== Sidebar Button ===== */
-[data-testid="stSidebar"] .stButton button {
-    background-color: #111827;
-    color: white !important;
-    border-radius: 10px;
-    border: none;
-}
-
-[data-testid="stSidebar"] .stButton button:hover {
-    background-color: #22c55e;
-}
-
-/* ===== Sidebar Selectbox / Input ===== */
-[data-testid="stSidebar"] .stSelectbox div,
-[data-testid="stSidebar"] .stTextInput input {
-    color: white !important;
-}
-
-
+    
     
     
  /* ===== Sidebar TEXT FIX ===== */
