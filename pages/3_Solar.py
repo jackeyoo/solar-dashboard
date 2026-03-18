@@ -12,6 +12,19 @@ st.set_page_config(page_title="Solar", page_icon="☀️", layout="wide")
 apply_style()
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 st.title("☀️ Solar Analysis")
 
 df = safe_load("solar_monthly")

@@ -2,7 +2,10 @@ import streamlit as st
 import plotly.express as px
 from utils import safe_load, find_col, to_num
 from style import apply_style, plot_theme
-
+from components.sidebar import render_sidebar
+from style import apply_style
+apply_style()
+render_sidebar()
 st.set_page_config(page_title="Overview", page_icon="📊", layout="wide")
 apply_style()
 
