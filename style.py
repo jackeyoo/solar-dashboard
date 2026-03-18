@@ -30,7 +30,7 @@ def apply_style():
 
     /* ===== Sidebar ===== */
     [data-testid="stSidebar"] {
-        color:  #FFFFFF;
+     color: white !important;
           background:   #000000;
         # background:   #DCDCDC;
         #   background: #9F0F8FF;
