@@ -34,11 +34,9 @@ def apply_style():
     }
 
     /* ===== Sidebar text ทั้งหมด ===== */
-    [data-testid="stSidebar"] * {
-        color: white !important;
-        font-size: 15px !important;
-        font-family: 'Prompt', sans-serif !important;
-    }
+   [data-testid="stSidebar"] * {
+    color: white !important;
+}
 
     /* ===== Sidebar Title ===== */
     [data-testid="stSidebar"] h1,
