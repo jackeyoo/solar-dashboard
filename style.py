@@ -93,6 +93,16 @@ def apply_style():
     border: none;
 }
 
+[data-testid="stSidebar"] .stButton button:hover {
+    background-color: #22c55e;
+}
+
+/* ===== Sidebar Selectbox / Input ===== */
+[data-testid="stSidebar"] .stSelectbox div,
+[data-testid="stSidebar"] .stTextInput input {
+    color: white !important;
+}
+    
     
     
     
