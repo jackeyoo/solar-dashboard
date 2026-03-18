@@ -1,3 +1,3 @@
 import streamlit as st
 
-st.title("HELLO")
+st.title("Solar Dashboard")
