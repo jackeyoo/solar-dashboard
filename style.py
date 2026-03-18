@@ -10,9 +10,9 @@ def apply_style():
     # header {visibility: hidden;}
 
     /* 🔥 ซ่อน streamlit_app (FIX จริง) */
-    # [data-testid="stSidebarNav"] ul li:first-child {
-    #     display: none !important;
-    # }
+    [data-testid="stSidebarNav"] ul li:first-child {
+        display: none !important;
+    }
 
     /* ===== Background ===== */
     .stApp {
