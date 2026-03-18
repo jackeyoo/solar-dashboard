@@ -28,7 +28,7 @@ def apply_style():
 
     /* ===== Sidebar ===== */
     [data-testid="stSidebar"] {
-        background: #99CCCC;
+        background: #9F0F8FF;
         border-right: 1px solid rgba(148,163,184,0.2);
     }
 
