@@ -13,6 +13,25 @@ render_sidebar()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 st.title("⚙️ Equipment Analysis")
 
 df = safe_load("equipment")

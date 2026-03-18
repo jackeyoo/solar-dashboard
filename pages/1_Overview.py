@@ -11,6 +11,19 @@ if st.sidebar.button("🔄 Refresh Data"):
     st.cache_data.clear()
     st.rerun()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 st.title("📊 Energy Overview")
 
 df        = safe_load("floor_summary")
