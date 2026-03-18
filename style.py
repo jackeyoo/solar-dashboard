@@ -9,7 +9,7 @@ def apply_style():
     header     {visibility: hidden;}
 
     .stApp {
-    background: radial-gradient(circle at top right, #FFFAFA 0%, #0f172a 50%, #020617 100%);
+  background: radial-gradient(circle at top right, #dbeafe 0%, #1e3a8a 50%, #020617 100%);
     }
     .block-container {
         padding-top: 1.5rem;
