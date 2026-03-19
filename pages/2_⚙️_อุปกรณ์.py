@@ -121,21 +121,21 @@ if selected == "🏭 เครื่องจักร ชั้น 3":
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # SUMMARY
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    # # SUMMARY
+    # st.markdown('<div class="card">', unsafe_allow_html=True)
 
-    total_kw = df_m[kw_col_m].sum()
-    total_cost = df_m[cost_col_m].sum()
+    # total_kw = df_m[kw_col_m].sum()
+    # total_cost = df_m[cost_col_m].sum()
 
-    colA, colB = st.columns(2)
+    # colA, colB = st.columns(2)
 
-    with colA:
-        st.metric("รวม kW", f"{total_kw:,.2f}")
+    # with colA:
+    #     st.metric("รวม kW", f"{total_kw:,.2f}")
 
-    with colB:
-        st.metric("ค่าไฟ/เดือน", f"฿{total_cost*24*30:,.0f}")
+    # with colB:
+    #     st.metric("ค่าไฟ/เดือน", f"฿{total_cost*24*30:,.0f}")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    # st.markdown('</div>', unsafe_allow_html=True)
 
 # ─────────────────────────────
 # ❄️ AC PAGE
@@ -206,30 +206,65 @@ else:
     # st.markdown('</div>', unsafe_allow_html=True)
      
     
-    # ─────────────────────────────
-# ⚙️ BOTTOM SECTION (สรุปอุปกรณ์)
+# ─────────────────────────────
+# ⚙️ BOTTOM SECTION (ดึงจาก equipment)
 # ─────────────────────────────
 st.markdown('<div class="card">', unsafe_allow_html=True)
 
 st.markdown(f"### ⚙️ อุปกรณ์อื่น ๆ {selected_floor}")
 
-import pandas as pd
+df_eq = safe_load("equipment")
 
-total_kw = df_floor[kw_col].sum()
-total_btu = df_floor[btu_col].sum() if btu_col else 0
-total_cost = df_floor[cost_col].sum() if cost_col else 0
+if df_eq.empty:
+    st.warning("โหลด equipment ไม่ได้")
+else:
+    # map column
+    floor_eq = find_col(df_eq, ["floor"])
+    name_eq  = find_col(df_eq, ["equipment", "name", "type"])
+    qty_eq   = find_col(df_eq, ["qty", "unit", "count"])
+    kw_eq    = find_col(df_eq, ["kw", "power"])
+    cost_eq  = find_col(df_eq, ["cost", "hour"])
 
-summary_df = pd.DataFrame([
-    {
-        "อุปกรณ์": "เครื่องปรับอากาศ (รวม)",
-        "จำนวน": f"{total_btu:,.0f} BTU",
-        "รวม kW": f"{total_kw:,.2f}",
-        "บาท/ชม.": f"{total_cost:,.2f}"
-    }
-])
+    # clean
+    for col in [kw_eq, cost_eq]:
+        if col:
+            df_eq[col] = to_num(df_eq[col])
 
-st.dataframe(summary_df, use_container_width=True, hide_index=True)
+    # filter ตามชั้น
+    df_eq_floor = df_eq[df_eq[floor_eq] == selected_floor]
 
+    if df_eq_floor.empty:
+        st.info("ไม่มีข้อมูลอุปกรณ์ในชั้นนี้")
+    else:
+        show_cols = [name_eq, qty_eq, kw_eq, cost_eq]
+        show_cols = [c for c in show_cols if c]
+
+        table = df_eq_floor[show_cols].copy()
+
+        # rename ให้สวย
+        rename_map = {
+            name_eq: "อุปกรณ์",
+            qty_eq: "จำนวน",
+            kw_eq: "kW",
+            cost_eq: "฿/ชม."
+        }
+        table.rename(columns=rename_map, inplace=True)
+
+        st.dataframe(table, use_container_width=True, hide_index=True)
+
+        # 🔥 รวม
+        total_kw_eq = table["kW"].sum() if "kW" in table else 0
+        total_cost_eq = table["฿/ชม."].sum() if "฿/ชม." in table else 0
+
+        colA, colB = st.columns(2)
+
+        with colA:
+            st.metric("รวม kW (อุปกรณ์)", f"{total_kw_eq:,.2f}")
+
+        with colB:
+            st.metric("ค่าไฟ/เดือน", f"฿{total_cost_eq*24*30:,.0f}")
+
+st.markdown('</div>', unsafe_allow_html=True)
 # # metric ด้านล่าง
 # colA, colB = st.columns(2)
 
