@@ -94,73 +94,40 @@ col1, col2 = st.columns([1.2, 1])
 # ---------- LEFT (TABLE)
 with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("### 📋 รายการเครื่องปรับอากาศ")
+    st.markdown(f"### 📋 รายการแอร์ {selected_floor}")
 
-    show_cols = [room_col]
+    table = df_floor[[room_col, btu_col, kw_col, cost_col]].copy()
 
-    if btu_col: show_cols.append(btu_col)
-    if kw_col: show_cols.append(kw_col)
-    if cost_col: show_cols.append(cost_col)
-
-    st.dataframe(
-        df_floor[show_cols],
-        use_container_width=True,
-        hide_index=True
-    )
+    # rename ให้สวย
+    table.columns = ["ห้อง/พื้นที่", "BTU", "kW", "฿/ชม."]
 
     # รวม
-    st.markdown("#### 🔢 รวม")
+    total_row = {
+        "ห้อง/พื้นที่": "รวม",
+        "BTU": table["BTU"].sum(),
+        "kW": table["kW"].sum(),
+        "฿/ชม.": table["฿/ชม."].sum()
+    }
 
-    if btu_col:
-        st.write(f"BTU: {df_floor[btu_col].sum():,.0f}")
+    # format ตัวเลข
+    def fmt(x):
+        return f"{x:,.2f}" if isinstance(x, (int, float)) else x
 
-    st.write(f"kW: {df_floor[kw_col].sum():,.2f}")
+    table_fmt = table.copy()
+    table_fmt["BTU"] = table_fmt["BTU"].map(lambda x: f"{x:,.0f}")
+    table_fmt["kW"] = table_fmt["kW"].map(lambda x: f"{x:,.2f}")
+    table_fmt["฿/ชม."] = table_fmt["฿/ชม."].map(lambda x: f"{x:,.2f}")
 
-    if cost_col:
-        st.write(f"บาท/ชม.: {df_floor[cost_col].sum():,.2f}")
+    total_fmt = {
+        "ห้อง/พื้นที่": "รวม",
+        "BTU": f"{total_row['BTU']:,.0f}",
+        "kW": f"{total_row['kW']:,.2f}",
+        "฿/ชม.": f"{total_row['฿/ชม.']:,.2f}",
+    }
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    import pandas as pd
+    table_fmt = pd.concat([table_fmt, pd.DataFrame([total_fmt])], ignore_index=True)
 
-# ---------- RIGHT (CHART)
-with col2:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("### 📊 กำลังไฟ (kW)")
-
-    chart = df_floor.sort_values(kw_col)
-
-    fig = px.bar(
-        chart,
-        x=kw_col,
-        y=room_col,
-        orientation="h",
-        text_auto=True,
-        color=kw_col,
-        color_continuous_scale="Blues"
-    )
-
-    fig.update_layout(height=420)
-
-    st.plotly_chart(plot_theme(fig), use_container_width=True)
+    st.dataframe(table_fmt, use_container_width=True, hide_index=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
-
-# ─────────────────────────────
-# ⚙️ BOTTOM SECTION
-# ─────────────────────────────
-st.markdown('<div class="card">', unsafe_allow_html=True)
-
-st.markdown(f"### ⚙️ รายละเอียดทั้งหมด - {selected_floor}")
-
-st.dataframe(df_floor, use_container_width=True, hide_index=True)
-
-# summary
-colA, colB = st.columns(2)
-
-with colA:
-    st.metric("รวม kW", f"{df_floor[kw_col].sum():,.2f}")
-
-with colB:
-    if cost_col:
-        st.metric("รวม บาท/ชม.", f"{df_floor[cost_col].sum():,.2f}")
-
-st.markdown('</div>', unsafe_allow_html=True)
