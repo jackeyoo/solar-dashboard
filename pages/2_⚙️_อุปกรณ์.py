@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.express as px
-from utils import safe_load, to_num
+from utils import safe_load, find_col, to_num
 from style import apply_style, plot_theme
 
 # ─────────────────────────────
@@ -43,10 +43,10 @@ st.title("❄️ AC Rooms Dashboard")
 # ─────────────────────────────
 # 📥 โหลด AC_Rooms
 # ─────────────────────────────
-df = safe_load("AC_Rooms")
+df = safe_load("ac_rooms")
 
 if df.empty:
-    st.error("โหลด AC_Rooms ไม่ได้")
+    st.error("โหลด ac_rooms ไม่ได้")
     st.stop()
 
 # ─────────────────────────────
