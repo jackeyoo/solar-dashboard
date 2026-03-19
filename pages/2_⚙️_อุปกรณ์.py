@@ -189,21 +189,21 @@ else:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # SUMMARY
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    # # SUMMARY
+    # st.markdown('<div class="card">', unsafe_allow_html=True)
 
-    total_kw = df_floor[kw_col].sum()
-    total_cost = df_floor[cost_col].sum()
+    # total_kw = df_floor[kw_col].sum()
+    # total_cost = df_floor[cost_col].sum()
 
-    colA, colB = st.columns(2)
+    # colA, colB = st.columns(2)
 
-    with colA:
-        st.metric("รวม kW", f"{total_kw:,.2f}")
+    # with colA:
+    #     st.metric("รวม kW", f"{total_kw:,.2f}")
 
-    with colB:
-        st.metric("ค่าไฟ/เดือน", f"฿{total_cost*24*30:,.0f}")
+    # with colB:
+    #     st.metric("ค่าไฟ/เดือน", f"฿{total_cost*24*30:,.0f}")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    # st.markdown('</div>', unsafe_allow_html=True)
      
     
     # ─────────────────────────────
@@ -230,15 +230,15 @@ summary_df = pd.DataFrame([
 
 st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
-# metric ด้านล่าง
-colA, colB = st.columns(2)
+# # metric ด้านล่าง
+# colA, colB = st.columns(2)
 
-with colA:
-    st.metric("รวม kW", f"{total_kw:,.2f}")
+# with colA:
+#     st.metric("รวม kW", f"{total_kw:,.2f}")
 
-with colB:
-    # สมมติเปิด 24 ชม. 30 วัน
-    monthly = total_cost * 24 * 30
-    st.metric("ประมาณค่าไฟ/เดือน", f"฿{monthly:,.0f}")
+# with colB:
+#     # สมมติเปิด 24 ชม. 30 วัน
+#     monthly = total_cost * 24 * 30
+#     st.metric("ประมาณค่าไฟ/เดือน", f"฿{monthly:,.0f}")
 
-st.markdown('</div>', unsafe_allow_html=True)
+# st.markdown('</div>', unsafe_allow_html=True)
