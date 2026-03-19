@@ -56,3 +56,54 @@ if name_col and cost_col:
                   color=cost_col, color_continuous_scale="Sunset",
                   title="Top 10 Equipment by Cost/Hour")
     st.plotly_chart(plot_theme(fig2), use_container_width=True)
+    # หา column ชั้น
+floor_col = find_col(df, ["floor", "ชั้น"])
+
+if not floor_col:
+    st.error("ไม่พบ column ชั้น (floor)")
+    st.stop()
+
+floors = sorted(df[floor_col].dropna().unique())
+
+tabs = st.tabs([f"ชั้น {f}" for f in floors])
+
+for tab, f in zip(tabs, floors):
+    with tab:
+        st.subheader(f"📍 ชั้น {f}")
+
+        df_floor = df[df[floor_col] == f]
+
+        # ตาราง
+        st.dataframe(df_floor, use_container_width=True, hide_index=True)
+
+        st.divider()
+
+        # กราฟ kW
+        if kw_col:
+            chart = df_floor.groupby(name_col)[kw_col].sum().reset_index()
+
+            fig = px.bar(
+                chart,
+                x=name_col,
+                y=kw_col,
+                text_auto=True,
+                color=kw_col,
+                color_continuous_scale="Teal",
+                title=f"Power (kW) - ชั้น {f}"
+            )
+            st.plotly_chart(plot_theme(fig), use_container_width=True)
+
+        # กราฟ Cost
+        if cost_col:
+            chart2 = df_floor.sort_values(cost_col, ascending=False).head(10)
+
+            fig2 = px.bar(
+                chart2,
+                x=name_col,
+                y=cost_col,
+                text_auto=True,
+                color=cost_col,
+                color_continuous_scale="Sunset",
+                title=f"Top Cost - ชั้น {f}"
+            )
+            st.plotly_chart(plot_theme(fig2), use_container_width=True)
