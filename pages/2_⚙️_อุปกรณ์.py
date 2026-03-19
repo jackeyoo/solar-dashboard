@@ -4,14 +4,12 @@ from utils import safe_load, find_col, to_num
 from style import apply_style, plot_theme
 
 # ─────────────────────────────
-# 🎨 UI Style
+# 🎨 UI STYLE
 # ─────────────────────────────
 def apply_custom_ui():
     st.markdown("""
     <style>
-    .block-container {
-        padding-top: 1rem;
-    }
+    .block-container { padding-top: 1rem; }
 
     .card {
         background: white;
@@ -41,26 +39,44 @@ apply_custom_ui()
 st.title("❄️ AC Rooms Dashboard")
 
 # ─────────────────────────────
-# 📥 โหลด AC_Rooms
+# 📥 LOAD DATA
 # ─────────────────────────────
 df = safe_load("ac_rooms")
 
 if df.empty:
-    st.error("โหลด ac_rooms ไม่ได้")
+    st.error("โหลด AC_Rooms ไม่ได้")
+    st.stop()
+
+# DEBUG (ลบออกทีหลังได้)
+# st.write(df.columns)
+
+# ─────────────────────────────
+# 🔎 AUTO MAP COLUMN (กันพัง)
+# ─────────────────────────────
+floor_col = find_col(df, ["floor"])
+room_col  = find_col(df, ["room"])
+kw_col    = find_col(df, ["kw"])
+btu_col   = find_col(df, ["btu"])
+cost_col  = find_col(df, ["cost"])
+unit_col  = find_col(df, ["unit"])
+
+required = [floor_col, room_col, kw_col]
+
+if any(c is None for c in required):
+    st.error(f"❌ หา column ไม่ครบ: {df.columns.tolist()}")
     st.stop()
 
 # ─────────────────────────────
-# 🔧 แปลงข้อมูล
+# 🔧 CLEAN DATA
 # ─────────────────────────────
-df["kW"] = to_num(df["kW"])
-df["Cost Per Hour THB"] = to_num(df["Cost Per Hour THB"])
-df["BTU"] = to_num(df["BTU"])
-df["Unit Count"] = to_num(df["Unit Count"])
+for col in [kw_col, btu_col, cost_col, unit_col]:
+    if col:
+        df[col] = to_num(df[col])
 
 # ─────────────────────────────
-# 🏢 เลือกชั้น
+# 🏢 FLOOR SELECT
 # ─────────────────────────────
-floors = sorted(df["Floor"].dropna().unique())
+floors = sorted(df[floor_col].dropna().unique())
 
 selected_floor = st.radio(
     "เลือกชั้น",
@@ -68,46 +84,57 @@ selected_floor = st.radio(
     horizontal=True
 )
 
-df_floor = df[df["Floor"] == selected_floor]
+df_floor = df[df[floor_col] == selected_floor]
 
 # ─────────────────────────────
 # 📊 TOP SECTION
 # ─────────────────────────────
 col1, col2 = st.columns([1.2, 1])
 
-# ---------- TABLE ----------
+# ---------- LEFT (TABLE)
 with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("### 📋 รายการเครื่องปรับอากาศ")
 
-    display = df_floor[[
-        "Room", "BTU", "kW", "Cost Per Hour THB"
-    ]]
+    show_cols = [room_col]
 
-    st.dataframe(display, use_container_width=True, hide_index=True)
+    if btu_col: show_cols.append(btu_col)
+    if kw_col: show_cols.append(kw_col)
+    if cost_col: show_cols.append(cost_col)
+
+    st.dataframe(
+        df_floor[show_cols],
+        use_container_width=True,
+        hide_index=True
+    )
 
     # รวม
     st.markdown("#### 🔢 รวม")
-    st.write(f"BTU: {display['BTU'].sum():,.0f}")
-    st.write(f"kW: {display['kW'].sum():,.2f}")
-    st.write(f"บาท/ชม.: {display['Cost Per Hour THB'].sum():,.2f}")
+
+    if btu_col:
+        st.write(f"BTU: {df_floor[btu_col].sum():,.0f}")
+
+    st.write(f"kW: {df_floor[kw_col].sum():,.2f}")
+
+    if cost_col:
+        st.write(f"บาท/ชม.: {df_floor[cost_col].sum():,.2f}")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------- CHART ----------
+# ---------- RIGHT (CHART)
 with col2:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("### 📊 กำลังไฟ (kW) แยกห้อง")
+    st.markdown("### 📊 กำลังไฟ (kW)")
 
-    chart = df_floor.sort_values("kW")
+    chart = df_floor.sort_values(kw_col)
 
     fig = px.bar(
         chart,
-        x="kW",
-        y="Room",
+        x=kw_col,
+        y=room_col,
         orientation="h",
         text_auto=True,
-        color="kW",
+        color=kw_col,
         color_continuous_scale="Blues"
     )
 
@@ -122,20 +149,18 @@ with col2:
 # ─────────────────────────────
 st.markdown('<div class="card">', unsafe_allow_html=True)
 
-st.markdown(f"### ⚙️ อุปกรณ์ทั้งหมด - {selected_floor}")
+st.markdown(f"### ⚙️ รายละเอียดทั้งหมด - {selected_floor}")
 
 st.dataframe(df_floor, use_container_width=True, hide_index=True)
 
 # summary
-total_kw = df_floor["kW"].sum()
-total_cost = df_floor["Cost Per Hour THB"].sum()
-
 colA, colB = st.columns(2)
 
 with colA:
-    st.metric("รวม kW", f"{total_kw:,.2f}")
+    st.metric("รวม kW", f"{df_floor[kw_col].sum():,.2f}")
 
 with colB:
-    st.metric("รวม บาท/ชั่วโมง", f"{total_cost:,.2f}")
+    if cost_col:
+        st.metric("รวม บาท/ชม.", f"{df_floor[cost_col].sum():,.2f}")
 
 st.markdown('</div>', unsafe_allow_html=True)
