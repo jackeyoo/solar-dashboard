@@ -3,6 +3,8 @@ import plotly.express as px
 from utils import safe_load, find_col, to_num
 from style import apply_style, plot_theme
 import pandas as pd
+import datetime
+import calendar
 
 # ─────────────────────────────
 # 🎨 UI STYLE
@@ -248,22 +250,49 @@ if selected != "🏭 เครื่องจักร ชั้น 3":
     # ─────────────────────────────
     summary_df = pd.DataFrame(summary_list)
 
-    # format ตัวเลข
-    summary_df["kW"] = summary_df["kW"].map(lambda x: f"{x:,.2f}")
-    summary_df["฿/ชม."] = summary_df["฿/ชม."].map(lambda x: f"{x:,.2f}")
+    # รวมทั้งหมด (ยึดจากตัวเลขก่อน format)
+    total_kw_all = pd.to_numeric(summary_df["kW"], errors="coerce").fillna(0).sum()
+    total_cost_all = pd.to_numeric(summary_df["฿/ชม."], errors="coerce").fillna(0).sum()
 
-    st.dataframe(summary_df, use_container_width=True, hide_index=True)
+    # format ตัวเลข (สำหรับตารางแสดงผลเท่านั้น)
+    display_df = summary_df.copy()
+    display_df["kW"] = (
+        pd.to_numeric(display_df["kW"], errors="coerce")
+        .fillna(0)
+        .map(lambda x: f"{x:,.2f}")
+    )
+    display_df["฿/ชม."] = (
+        pd.to_numeric(display_df["฿/ชม."], errors="coerce")
+        .fillna(0)
+        .map(lambda x: f"{x:,.2f}")
+    )
 
-    # 🔥 รวมทั้งหมดจริง
-    total_kw_all = sum(float(str(x).replace(",", "")) for x in summary_df["kW"])
-    total_cost_all = sum(float(str(x).replace(",", "")) for x in summary_df["฿/ชม."])
+    st.dataframe(display_df, use_container_width=True, hide_index=True)
+
+    # คำนวณรายเดือน: ชั่วโมง/วัน (ปรับได้) × จำนวนวันจริงของเดือนปัจจุบัน
+    today = datetime.date.today()
+    days_in_month = calendar.monthrange(today.year, today.month)[1]
+    hours_per_day = st.slider("ชั่วโมงใช้งานต่อวัน", min_value=0, max_value=24, value=7, step=1)
+
+    monthly_kwh = total_kw_all * hours_per_day * days_in_month
+    monthly_cost = total_cost_all * hours_per_day * days_in_month
 
     colA, colB = st.columns(2)
 
     with colA:
-        st.metric("รวม kW ทั้งหมด", f"{total_kw_all:,.2f}")
+        st.metric(
+            "รวม kW ทั้งหมด",
+            f"{total_kw_all:,.2f}",
+            delta=f"{monthly_kwh:,.0f} kWh/เดือน",
+            delta_color="off",
+        )
 
     with colB:
-        st.metric("ค่าไฟ/เดือน", f"฿{total_cost_all*24*30:,.0f}")
+        st.metric(
+            "ค่าไฟ/เดือน",
+            f"฿{monthly_cost:,.0f}",
+            delta=f"{hours_per_day} ชม./วัน × {days_in_month} วัน",
+            delta_color="off",
+        )
 
     st.markdown('</div>', unsafe_allow_html=True)
