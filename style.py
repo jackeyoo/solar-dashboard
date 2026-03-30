@@ -5,7 +5,7 @@ def apply_style():
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-    #MainMenu {visibility: hidden;}
+    MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
     [data-testid="stSidebarNav"] ul li:first-child {
