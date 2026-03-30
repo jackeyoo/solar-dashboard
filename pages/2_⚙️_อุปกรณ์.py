@@ -25,7 +25,7 @@ def apply_custom_ui():
     h1 {
         font-size: 1.25rem !important;
         font-weight: 600 !important;
-        color: #f8fafc !important;
+        # color: #f8fafc !important;
         letter-spacing: -.3px;
         margin-bottom: 0 !important;
     }
@@ -247,7 +247,7 @@ if st.sidebar.button("🔄 Refresh Data"):
 # ─────────────────────────────
 st.markdown("""
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px  ">
-  <span style="font-size:1.4rem ;color:#1a1d2e">⚡</span>
+  <span style="font-size:1.4rem; color:#000000">⚡</span>
   <h1 style="margin:0 ; color:#1a1d2e">Energy Dashboard</h1>
 </div>
 """, unsafe_allow_html=True)
