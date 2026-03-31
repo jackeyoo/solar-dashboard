@@ -3,6 +3,7 @@ import plotly.express as px
 from utils import safe_load, find_col, to_num
 from style import apply_style, plot_theme
 import pandas as pd
+import io
 import datetime
 import calendar
 
@@ -535,7 +536,7 @@ def _render_ac_floor(floor_val) -> pd.DataFrame:
     return df_f
 
 
-def _render_floor_summary(floor_val, df_f: pd.DataFrame) -> float:
+def _render_floor_summary(floor_val, df_f: pd.DataFrame) -> tuple[float, pd.DataFrame]:
     st.markdown(
         '<div class="section-label" style="margin-top:14px">อุปกรณ์ทั้งหมดในชั้นนี้</div>',
         unsafe_allow_html=True,
@@ -602,7 +603,7 @@ def _render_floor_summary(floor_val, df_f: pd.DataFrame) -> float:
     summary_df = pd.DataFrame(rows)
     if summary_df.empty:
         st.info("ไม่มีข้อมูลสำหรับชั้นนี้")
-        return 0.0
+        return 0.0, pd.DataFrame()
 
     summary_df.insert(0, "เลือก", True)
     summary_df["kW"]     = pd.to_numeric(summary_df["kW"],     errors="coerce").fillna(0)
@@ -628,34 +629,56 @@ def _render_floor_summary(floor_val, df_f: pd.DataFrame) -> float:
     )
 
     sel = edited_df[edited_df["เลือก"]].copy() if "เลือก" in edited_df.columns else edited_df.copy()
-    sel["_h"]            = sel["ชม./วัน"].apply(_h)
-    sel["_monthly_cost"] = sel["฿/ชม."] * sel["_h"] * working_days
-    monthly_cost_floor   = float(sel["_monthly_cost"].sum())
+    sel["_h"] = sel["ชม./วัน"].apply(_h)
+    sel["ค่าไฟ/วัน"] = sel["฿/ชม."] * sel["_h"]
+    sel["ค่าไฟ/เดือน"] = sel["ค่าไฟ/วัน"] * working_days
+    monthly_cost_floor = float(sel["ค่าไฟ/เดือน"].sum())
 
-    st.markdown(f"""
-    <div class="floor-cost-row">
-      <span class="floor-cost-label">
-        ค่าไฟชั้นนี้ — {THAI_MONTHS[selected_month_idx]} {selected_year_be}
-        &nbsp;·&nbsp; วันทำงาน {working_days} วัน
-      </span>
-      <span class="floor-cost-value">฿{monthly_cost_floor:,.0f}</span>
-    </div>
-    """, unsafe_allow_html=True)
+    export_df = sel[["อุปกรณ์", "จำนวน", "kW", "฿/ชม.", "ชม./วัน", "ค่าไฟ/วัน", "ค่าไฟ/เดือน"]].copy()
+    export_df.insert(0, "ชั้น", _floor_label(floor_val))
 
-    return monthly_cost_floor
+    c_dl1, c_dl2 = st.columns([1, 1])
+    with c_dl1:
+        st.markdown(f"""
+        <div class="floor-cost-row">
+          <span class="floor-cost-label">
+            ค่าไฟชั้นนี้ — {THAI_MONTHS[selected_month_idx]} {selected_year_be}
+            &nbsp;·&nbsp; วันทำงาน {working_days} วัน
+          </span>
+          <span class="floor-cost-value">฿{monthly_cost_floor:,.0f}</span>
+        </div>
+        """, unsafe_allow_html=True)
+    with c_dl2:
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            export_df.to_excel(writer, index=False, sheet_name="Summary")
+
+        st.download_button(
+            label=f"⬇️ ดาวน์โหลด Excel {_floor_label(floor_val)}",
+            data=output.getvalue(),
+            file_name=f"energy_summary_{str(floor_val).replace(' ', '_')}_{selected_year}_{selected_month:02d}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key=f"download_excel_{floor_val}",
+            use_container_width=True,
+        )
+
+    return monthly_cost_floor, export_df
 
 
 # ─────────────────────────────
 # 🏢 RENDER แต่ละชั้น (Expander)
 # ─────────────────────────────
 floor_monthly_costs: list[float] = []
+all_export_frames: list[pd.DataFrame] = []
 
 if selected_floors:
     for floor_val in selected_floors:
         with st.expander(f"🏢 {_floor_label(floor_val)}", expanded=(len(selected_floors) == 1)):
             df_floor_local = _render_ac_floor(floor_val)
-            cost = _render_floor_summary(floor_val, df_floor_local)
+            cost, export_df = _render_floor_summary(floor_val, df_floor_local)
             floor_monthly_costs.append(cost)
+            if export_df is not None and not export_df.empty:
+                all_export_frames.append(export_df)
 
 if show_machines:
     with st.expander(MACHINES_LABEL, expanded=False):
@@ -699,6 +722,31 @@ if selected_floors:
       <div class="total-value">฿{total:,.0f}</div>
     </div>
     """, unsafe_allow_html=True)
+
+    if all_export_frames:
+        all_export_df = pd.concat(all_export_frames, ignore_index=True)
+        summary_total_df = (
+            all_export_df.groupby("ชั้น", as_index=False)["ค่าไฟ/เดือน"]
+            .sum()
+            .rename(columns={"ค่าไฟ/เดือน": "รวมค่าไฟ/เดือน"})
+        )
+        summary_total_df.loc[len(summary_total_df)] = ["รวมทั้งหมด", float(summary_total_df["รวมค่าไฟ/เดือน"].sum())]
+
+        output_all = io.BytesIO()
+        with pd.ExcelWriter(output_all, engine="openpyxl") as writer:
+            all_export_df.to_excel(writer, index=False, sheet_name="รายละเอียดทั้งหมด")
+            summary_total_df.to_excel(writer, index=False, sheet_name="สรุปรวม")
+
+        st.download_button(
+            label="⬇️ ดาวน์โหลด Excel รวมทุกชั้น",
+            data=output_all.getvalue(),
+            file_name=f"energy_summary_all_floors_{selected_year}_{selected_month:02d}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key="download_excel_all_floors",
+            use_container_width=True,
+        )
+
+        st.dataframe(summary_total_df, use_container_width=True, hide_index=True)
 
 else:
     st.info("เลือกชั้นอย่างน้อย 1 ชั้น เพื่อคำนวณยอดรวม")
