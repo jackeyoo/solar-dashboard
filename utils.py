@@ -9,6 +9,7 @@ GIDS = {
     "floor_summary": 2040283256,
     "ac_rooms":      0,
         "machines_floor3": 798227041,   # 👈 เพิ่มตรงนี้
+       "monthly_bill":1605055572,
 }
 
 
